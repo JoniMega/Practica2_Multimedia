@@ -3,7 +3,8 @@
  */
 
 var canvas, context;
-var imatgePista, imatgeCara;
+var imatgePista, imatgeCara, imatgeSortida;
+var sortida={x:0, y:0}
 var cara={x:0,y:0, moviment:{dx:0,dy:0}};           // posició actual de la cara i moviment de la cara
 var direccio=[{dx:1,dy:0},{dx:0,dy:1},{dx:-1,dy:0},{dx:0,dy:-1}];  // dreta, avall, esquerra i amunt
 
@@ -13,6 +14,8 @@ var mark;        // no deixa rastre del camí recorregut
 var autopilot;
 
 var temporitzador;  // animacions
+var començar=false; //true si ha començat la partida
+var segons=0; //el temps de partida des de que ha començat
 
 $(document).ready(function(){
 
@@ -46,7 +49,7 @@ $(document).ready(function(){
 //////////////////////////////
 
     canvas=$("#canvas")[0];              // Objecte DOM, equivalent a document.getElementById("canvas") 
-    imatgePista=$("#pista")[0];	         // Objecte DOM   
+    imatgePista=$("#pista")[0];          // Objecte DOM
 
     canvas.width=imatgePista.width;              // dimenciona el llenç d'acord a la mida de la imatge
     canvas.height=imatgePista.height;
@@ -59,10 +62,30 @@ $(document).ready(function(){
     cara.x=115; cara.y=10;
     context.drawImage(imatgeCara, cara.x, cara.y);  // "dibuixa" la cara
 
+    imatgeSortida=$("#sortida")[0];
+    sortida.x=894; sortida.y=590;
+    context.drawImage(imatgeSortida, sortida.x, sortida.y); //"dibuixa" la sortida
+
     mark=$("#mark").is(":checked");
     autopilot=$("#auto").is(":checked");
 
     temporitzador = window.requestAnimationFrame(dibuixaFotograma);  // s'actualitza a f=60Hz, 60fps
+
+    $(document).ready(function(){  //funció que determina quan de temps hi ha entre que es repeteix una funcio
+        setInterval(rellotge,1000); //cada 1 segon executa la funcio rellotge
+    });
+
+    function rellotge() { //cronometre
+        if(començar) {
+            if (segons == 10) {
+                alert("Temps!")
+                segons++;
+            }
+            else {
+                segons++;
+            }
+        }
+    }
 
     // events
     $(document).keydown(function(e){
@@ -72,7 +95,9 @@ $(document).ready(function(){
             case TECLA.AVALL   : cara.moviment.dy =  1; break;
             case TECLA.DRETA   : cara.moviment.dx =  1; break;
             case TECLA.ESQUERRA: cara.moviment.dx = -1; break;
+            case TECLA.MAJUSCULES: alert(cara.x +" "+ cara.y); break; // eina del desenvolupador: et diu la posició de la cara
         }
+
     });
 
     $(document).keyup(function(){
@@ -117,10 +142,14 @@ function dibuixaFotograma() {
         }
         // Dibuixa la cara en la nova posició
         context.drawImage(imatgeCara, cara.x, cara.y);
+        if(cara.x==894 && cara.y==590){
+            alert("felicitats");
+        }
 
     }
     window.requestAnimationFrame(dibuixaFotograma);  // es crida un cop cada f=60Hz, 60fps
 }
+
 
 function hiHaCol_lisio() {
     // Agafem el bloc de píxels de la imatge on està situada la cara
@@ -143,7 +172,9 @@ function hiHaCol_lisio() {
     return false;
 }
 
+
 $("#start").click(function(e) {
     $("#menu").hide();
     $("#maze").show();
+    començar=true; //comença la partida
 });
